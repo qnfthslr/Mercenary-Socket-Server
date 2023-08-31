@@ -3,11 +3,15 @@ import multiprocessing as mp
 from datetime import datetime as dt
 import logging
 
+from receiver.rx import Receiver
+
+
 class SocketServer:
     def __init__(self, host, port):
         self.host = host
         self.port = port
         self.server_socket = None
+        self.receiver_process = None
         self.logger = self.setup_logging()
 
     def setup_logging(self):
@@ -30,14 +34,15 @@ class SocketServer:
             try:
                 self.server_socket.bind((self.host, self.port))
                 self.server_socket.listen(1)
+
+                receiver = Receiver()
                 while True:
-                    conn, address = self.server_socket.accept()
-                    with conn:
-                        self.logger.debug('{} received data from {}'.format(dt.now(), address[0]))
-                        p = mp.Process(target=self.handler, args=(conn, address))
-                        p.daemon = True
-                        p.start()
-                        self.logger.debug('{} created process {}'.format(dt.now(), p.pid))
+                    client_socket, client_address = self.server_socket.accept()
+                    self.logger.debug('{} received data from {}'.format(dt.now(), client_address[0]))
+                    self.receiver_process = mp.Process(target=receiver.receive_response, args=(client_socket, client_address))
+                    self.receiver_process.daemon = True
+                    self.receiver_process.start()
+                    self.logger.debug('{} created process {}'.format(dt.now(), self.receiver_process.pid))
 
             except Exception as e:
                 self.logger.debug(e)
