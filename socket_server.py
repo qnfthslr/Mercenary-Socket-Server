@@ -4,6 +4,7 @@ from datetime import datetime as dt
 import logging
 
 from receiver.rx import Receiver
+from transmitter.tx import Transmitter
 
 
 class SocketServer:
@@ -12,7 +13,11 @@ class SocketServer:
         self.port = port
         self.server_socket = None
         self.receiver_process = None
+        self.transmit_process = None
         self.logger = self.setup_logging()
+
+    def get_receiver_process(self):
+        return self.receiver_process
 
     def setup_logging(self):
         logging.basicConfig(level=logging.DEBUG)
@@ -36,13 +41,21 @@ class SocketServer:
                 self.server_socket.listen(1)
 
                 receiver = Receiver()
+                transmitter = Transmitter()
                 while True:
                     client_socket, client_address = self.server_socket.accept()
                     self.logger.debug('{} received data from {}'.format(dt.now(), client_address[0]))
                     self.receiver_process = mp.Process(target=receiver.receive_response, args=(client_socket, client_address))
                     self.receiver_process.daemon = True
                     self.receiver_process.start()
+
                     self.logger.debug('{} created process {}'.format(dt.now(), self.receiver_process.pid))
+
+                    self.transmit_process = mp.Process(target=transmitter.transmit_command, args=(client_socket, client_address))
+                    self.transmit_process.daemon = True
+                    self.transmit_process.start()
+
+                    self.logger.debug('{} created process {}'.format(dt.now(), self.transmit_process.pid))
 
             except Exception as e:
                 self.logger.debug(e)
