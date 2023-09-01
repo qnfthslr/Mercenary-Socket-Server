@@ -1,8 +1,14 @@
+import multiprocessing
 import time
 
 from transmitter.message_queue.manager import TransmitterCommandDataQueue
 
 from datetime import datetime as dt
+
+try:
+    from app.system_queue.queue import socket_server_queue
+except ImportError:
+    socket_server_queue = multiprocessing.Queue()
 
 
 class Transmitter:
@@ -14,13 +20,15 @@ class Transmitter:
         print("transmit_command client_address: ", client_address)
         while True:
             with client_socket:
-                data = self.transmitter_command_data_queue.get()
-                if data is None:
+                from_fastapi_data = socket_server_queue.get()
+                print("from fastapi data: ", from_fastapi_data[0], from_fastapi_data[1])
+                # data = self.transmitter_command_data_queue.get()
+                if from_fastapi_data[0] is None:
                     time.sleep(0.05)
                     continue
 
-                if isinstance(data, tuple):
-                    string_data = ' '.join(map(str, data))
+                if isinstance(from_fastapi_data, tuple):
+                    string_data = ' '.join(map(str, from_fastapi_data))
                     print('{} command transmit [{}] from {}'.format(dt.now(), string_data, client_address[0]))
                     client_socket.sendall(string_data.encode())
                 else:

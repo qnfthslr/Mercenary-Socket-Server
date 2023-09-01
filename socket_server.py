@@ -36,16 +36,6 @@ class SocketServer:
         logging.basicConfig(level=logging.DEBUG)
         return logging.getLogger(__name__)
 
-    def handler(self, conn, address):
-        with conn:
-            data = conn.recv(1024)
-            command_str = data.decode().strip()
-            self.logger.debug('{} command received [{}] from {}'.format(dt.now(), command_str, address[0]))
-            if len(data) > 0:
-                resp = 'server: {} message received [{}] from {}'.format(dt.now(), command_str, address[0])
-                conn.sendall(resp.encode())
-                return
-
     def start(self):
         self.logger.debug('server started {}'.format(dt.now()))
         with sk.socket(sk.AF_INET, sk.SOCK_STREAM) as self.server_socket:
