@@ -11,18 +11,20 @@ class Transmitter:
         self.transmitter_command_data_queue = TransmitterCommandDataQueue()
 
     def transmit_command(self, client_socket, client_address):
-        print("client_address: ", client_address)
+        print("transmit_command client_address: ", client_address)
         while True:
             with client_socket:
-                if self.transmitter_command_data_queue.get() is None:
+                data = self.transmitter_command_data_queue.get()
+                if data is None:
                     time.sleep(0.05)
                     continue
 
-                data = self.transmitter_command_data_queue.get()
-
-                print('{} command transmit [{}] from {}'.format(dt.now(), data, client_address[0]))
-
-                client_socket.sendall(data.encode())
+                if isinstance(data, tuple):
+                    string_data = ' '.join(map(str, data))
+                    print('{} command transmit [{}] from {}'.format(dt.now(), string_data, client_address[0]))
+                    client_socket.sendall(string_data.encode())
+                else:
+                    print("Something wrong in command")
 
     def put_command_data(self, command, data):
         print("put_command_data")
