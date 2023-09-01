@@ -12,12 +12,25 @@ class SocketServer:
         self.host = host
         self.port = port
         self.server_socket = None
+
+        self.receiver = None
         self.receiver_process = None
+
+        self.transmitter = None
         self.transmit_process = None
         self.logger = self.setup_logging()
 
+    def get_receiver(self):
+        return self.receiver
+
     def get_receiver_process(self):
         return self.receiver_process
+
+    def get_transmitter(self):
+        return self.transmitter
+
+    def get_transmit_process(self):
+        return self.transmit_process
 
     def setup_logging(self):
         logging.basicConfig(level=logging.DEBUG)
@@ -40,18 +53,19 @@ class SocketServer:
                 self.server_socket.bind((self.host, self.port))
                 self.server_socket.listen(1)
 
-                receiver = Receiver()
-                transmitter = Transmitter()
+                self.receiver = Receiver()
+                self.transmitter = Transmitter()
                 while True:
                     client_socket, client_address = self.server_socket.accept()
                     self.logger.debug('{} received data from {}'.format(dt.now(), client_address[0]))
-                    self.receiver_process = mp.Process(target=receiver.receive_response, args=(client_socket, client_address))
+                    # TODO: 현재 여기 부분 소켓 생성 이후 루프 돌면서 지속적으로 생성됨 (개선 필요함)
+                    self.receiver_process = mp.Process(target=self.receiver.receive_response, args=(client_socket, client_address))
                     self.receiver_process.daemon = True
                     self.receiver_process.start()
 
                     self.logger.debug('{} created process {}'.format(dt.now(), self.receiver_process.pid))
 
-                    self.transmit_process = mp.Process(target=transmitter.transmit_command, args=(client_socket, client_address))
+                    self.transmit_process = mp.Process(target=self.transmitter.transmit_command, args=(client_socket, client_address))
                     self.transmit_process.daemon = True
                     self.transmit_process.start()
 
