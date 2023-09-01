@@ -9,7 +9,7 @@ class Receiver:
         self.receiver_response_queue = ReceiverResponseQueue()
 
     def receive_response(self, client_socket, client_address):
-        print("client_address: ", client_address)
+        print("receive_response client_address: ", client_address)
         with client_socket:
             data = client_socket.recv(1024)
             response_str = data.decode().strip()
