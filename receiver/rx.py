@@ -25,14 +25,16 @@ class Receiver:
 
         signal.signal(signal.SIGINT, sigint_receiver_handler)
 
-        with client_socket:
+        while True:
+            # with client_socket:
             try:
                 data = client_socket.recv(1024)
                 response_str = data.decode().strip()
                 print('{} command received [{}] from {}'.format(dt.now(), response_str, client_address[0]))
 
                 self.receiver_response_queue.put(response_str)
+                time.sleep(0.5)
 
             except socket.error:
-                #client_socket.close()
-                print("Receiver Socket closed due to error")
+                print("is it operate ? (receiver)")
+                time.sleep(0.5)
