@@ -58,7 +58,7 @@ class Transmitter:
                 time.sleep(0.5)
 
             except queue.Empty:
-                print("socket_server_queue empty")
+                #print("socket_server_queue empty")
                 time.sleep(0.5)
 
             except Exception as ex:
