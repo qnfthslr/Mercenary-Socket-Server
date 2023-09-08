@@ -26,9 +26,13 @@ class Receiver:
         signal.signal(signal.SIGINT, sigint_receiver_handler)
 
         while True:
-            # with client_socket:
             try:
                 data = client_socket.recv(1024)
+                if not data:
+                    print("Client disconnected!")
+                    client_socket.close()
+                    break
+
                 response_str = data.decode().strip()
                 print('{} command received [{}] from {}'.format(dt.now(), response_str, client_address[0]))
 
@@ -36,5 +40,4 @@ class Receiver:
                 time.sleep(0.5)
 
             except socket.error:
-                print("is it operate ? (receiver)")
                 time.sleep(0.5)
