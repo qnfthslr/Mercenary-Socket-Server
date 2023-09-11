@@ -3,7 +3,21 @@ import signal
 import socket
 import time
 
-from receiver.message_queue.manager import ReceiverResponseQueue
+import importlib
+
+script_directory = os.path.dirname(__file__)
+print("rxq script_directory: ", script_directory)
+
+module_path = "./message_queue"
+absolute_module_path = os.path.abspath(os.path.join(script_directory, module_path))
+relative_module_path = os.path.relpath(absolute_module_path, os.path.abspath(os.getcwd()))
+relative_rxq_module_path_for_importlib = relative_module_path.replace(os.path.sep, ".").lstrip(".")
+relative_rxq_module_path_for_importlib += ".manager"
+print("relative_rxq_module_path_for_importlib: ", relative_rxq_module_path_for_importlib)
+
+rxq_module = importlib.import_module(relative_rxq_module_path_for_importlib)
+
+#from receiver.message_queue.manager import ReceiverResponseQueue
 
 from datetime import datetime as dt
 
@@ -11,7 +25,7 @@ from datetime import datetime as dt
 class Receiver:
     def __init__(self):
         print("Receiver Constructor")
-        self.receiver_response_queue = ReceiverResponseQueue()
+        self.receiver_response_queue = rxq_module.ReceiverResponseQueue()
 
     def receive_response(self, client_socket, client_address, pid_queue):
         print("receive_response client_address: ", client_address)

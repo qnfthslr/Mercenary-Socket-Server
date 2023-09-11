@@ -6,9 +6,33 @@ import logging
 import socket
 from time import sleep
 
-from receiver.rx import Receiver
-from transmitter.tx import Transmitter
 import os
+import importlib
+
+script_directory = os.path.dirname(__file__)
+print("socket_server script_directory: ", script_directory)
+
+module_path = "./receiver"
+absolute_module_path = os.path.abspath(os.path.join(script_directory, module_path))
+relative_module_path = os.path.relpath(absolute_module_path, os.path.abspath(os.getcwd()))
+relative_rx_module_path_for_importlib = relative_module_path.replace(os.path.sep, ".").lstrip(".")
+relative_rx_module_path_for_importlib += ".rx"
+print("relative_rx_module_path_for_importlib: ", relative_rx_module_path_for_importlib)
+
+receiver_module = importlib.import_module(relative_rx_module_path_for_importlib)
+#socket_server_module = importlib.import_module(relative_module_path_for_importlib)
+#from receiver.rx import Receiver
+
+module_path = "./transmitter"
+absolute_module_path = os.path.abspath(os.path.join(script_directory, module_path))
+relative_module_path = os.path.relpath(absolute_module_path, os.path.abspath(os.getcwd()))
+relative_tx_module_path_for_importlib = relative_module_path.replace(os.path.sep, ".").lstrip(".")
+relative_tx_module_path_for_importlib += ".tx"
+print("relative_tx_module_path_for_importlib: ", relative_tx_module_path_for_importlib)
+
+transmitter_module = importlib.import_module(relative_tx_module_path_for_importlib)
+#from transmitter.tx import Transmitter
+
 import signal
 import time
 
@@ -89,8 +113,8 @@ class SocketServer:
                 self.server_socket.bind((self.host, self.port))
                 self.server_socket.listen(1)
 
-                self.receiver = Receiver()
-                self.transmitter = Transmitter()
+                self.receiver = receiver_module.Receiver()
+                self.transmitter = transmitter_module.Transmitter()
 
                 self.pid = os.getpid()
 

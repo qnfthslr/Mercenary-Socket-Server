@@ -5,7 +5,20 @@ import signal
 import socket
 import time
 
-from transmitter.message_queue.manager import TransmitterCommandDataQueue
+import importlib
+
+script_directory = os.path.dirname(__file__)
+print("txq script_directory: ", script_directory)
+
+module_path = "./message_queue"
+absolute_module_path = os.path.abspath(os.path.join(script_directory, module_path))
+relative_module_path = os.path.relpath(absolute_module_path, os.path.abspath(os.getcwd()))
+relative_txq_module_path_for_importlib = relative_module_path.replace(os.path.sep, ".").lstrip(".")
+relative_txq_module_path_for_importlib += ".manager"
+print("relative_txq_module_path_for_importlib: ", relative_txq_module_path_for_importlib)
+
+txq_module = importlib.import_module(relative_txq_module_path_for_importlib)
+#from transmitter.message_queue.manager import TransmitterCommandDataQueue
 
 from datetime import datetime as dt
 
@@ -18,7 +31,7 @@ except ImportError:
 class Transmitter:
     def __init__(self):
         #print("Transmitter Constructor")
-        self.transmitter_command_data_queue = TransmitterCommandDataQueue()
+        self.transmitter_command_data_queue = txq_module.TransmitterCommandDataQueue()
 
     def get_pid(self):
         return self.pid
