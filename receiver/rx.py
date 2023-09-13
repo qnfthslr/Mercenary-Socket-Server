@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import signal
 import socket
@@ -20,6 +21,11 @@ rxq_module = importlib.import_module(relative_rxq_module_path_for_importlib)
 #from receiver.message_queue.manager import ReceiverResponseQueue
 
 from datetime import datetime as dt
+
+try:
+    from app.system_queue.queue import socket_server_response_queue
+except ImportError:
+    socket_server_response_queue = multiprocessing.Queue()
 
 
 class Receiver:
@@ -47,10 +53,10 @@ class Receiver:
                     client_socket.close()
                     break
 
-                response_str = data.decode().strip()
-                print('{} command received [{}] from {}'.format(dt.now(), response_str, client_address[0]))
+                to_fastapi_response_data = data.decode().strip()
+                print('{} command received [{}] from {}'.format(dt.now(), to_fastapi_response_data, client_address[0]))
 
-                self.receiver_response_queue.put(response_str)
+                socket_server_response_queue.put(to_fastapi_response_data);
                 time.sleep(0.5)
 
             except socket.error:
