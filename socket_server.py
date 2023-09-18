@@ -36,7 +36,6 @@ transmitter_module = importlib.import_module(relative_tx_module_path_for_importl
 import signal
 import time
 
-
 class SocketServer:
     def __init__(self, host, port):
         print("SocketServer Constructor")
@@ -95,6 +94,7 @@ class SocketServer:
         else:
             print("Socket is not initialized")
 
+        # SIGINT 시그널 처리하는 함수. (Ctrl + C)
         def sigint_socket_handler(signum, frame):
             print("Main Socket Received SIGINT")
             #self.receiver_process.terminate()
@@ -163,6 +163,7 @@ class SocketServer:
             finally:
                 self.kill_all_process()
 
+    # 모든 프로세스 종료하고 관련 자원 정리
     def kill_all_process(self):
         for p in mp.active_children():
             print('pid : {} terminated'.format(p.pid))

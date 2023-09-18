@@ -27,7 +27,6 @@ try:
 except ImportError:
     socket_server_response_queue = multiprocessing.Queue()
 
-
 class Receiver:
     def __init__(self):
         print("Receiver Constructor")

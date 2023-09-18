@@ -1,6 +1,5 @@
 import multiprocessing as mp
 
-
 class ReceiverResponseQueue:
     def __init__(self):
         self.message_queue = mp.Queue()
